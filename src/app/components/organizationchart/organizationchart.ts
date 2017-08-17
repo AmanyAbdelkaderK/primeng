@@ -105,8 +105,8 @@ export class OrganizationChartNode {
     }
     
     toggleNode(event: Event, node: TreeNode) {
-        node.expanded = !node.expanded;
-        event.preventDefault();
+		this.chart.toggleNode(event, node)
+	  
     }
     
     isSelected() {
@@ -136,7 +136,11 @@ export class OrganizationChart implements AfterContentInit {
     @Input() selection: any;
     
     @Output() selectionChange: EventEmitter<any> = new EventEmitter();
+	
+    @Output() onNodeExpand: EventEmitter<any> = new EventEmitter();
     
+    @Output() onNodeCollapse: EventEmitter<any> = new EventEmitter();
+	
     @Output() onNodeSelect: EventEmitter<any> = new EventEmitter();
     
     @Output() onNodeUnselect: EventEmitter<any> = new EventEmitter();
@@ -167,11 +171,19 @@ export class OrganizationChart implements AfterContentInit {
         else
             return null;
     }
-    
+     toggleNode(event: Event, node: TreeNode) {
+		   if (node.expanded)
+            this.onNodeCollapse.emit({ originalEvent: event, node: node });
+        else
+            this.onNodeExpand.emit({ originalEvent: event, node: node });
+        node.expanded = !node.expanded;
+        event.preventDefault();
+	 }
+	 
     onNodeClick(event: Event, node: TreeNode) {
         let eventTarget = (<Element> event.target);
         
-        if(eventTarget.className && (eventTarget.className.indexOf('ui-node-toggler') !== -1 || eventTarget.className.indexOf('ui-node-toggler-icon') !== -1)) {
+        if(eventTarget.className && (eventTarget.className.indexOf('ui-node-toggler') !== -1 || eventTarget.className.indexOf('ui-node-toggler-icon') !== -1)) {
             return;
         }
         else if(this.selectionMode) {
